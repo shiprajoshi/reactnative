@@ -1,6 +1,6 @@
 import React,{Component} from 'react';
-import {View, Text, Button, TextInput, StyleSheet, ImageBackground, Dimensions, KeyboardAvoidingView,Keyboard,TouchableWithoutFeedback } from 'react-native';
-import startMainTabs from '../MainTabs/startMainTabs'; 
+import {View, Text, Button, TextInput, StyleSheet, ImageBackground, Dimensions, KeyboardAvoidingView,Keyboard,TouchableWithoutFeedback, ActivityIndicator } from 'react-native';
+// import startMainTabs from '../MainTabs/startMainTabs'; 
 import DefaultInput from '../../components/UI/DefaultInput/DefaultInput';
 import HeadingText from '../../components/UI/HeadingText/HeadingText';
 import MainText from '../../components/UI/MainText/MainText';
@@ -8,7 +8,7 @@ import ButtonWithBackground from '../../components/UI/ButtonWithBackground/Butto
 import image from '../../assets/image.jpg';
 import validate from '../../utility/validation';
 import {connect} from 'react-redux';
-import {tryAuth} from '../../store/actions/auth';
+import {tryAuth, autoSignIn} from '../../store/actions/auth';
 
 class AuthScreen extends Component{
     state = {
@@ -48,16 +48,19 @@ class AuthScreen extends Component{
       componentWillUnmount(){
           Dimensions.removeEventListener("change", this.updateStyles);
       }
+
+      componentDidMount(){
+        this.props.onautoSignIn();
+      }
+
       switchAuthModeHandler=()=>{
-       
         this.setState(prevState=>{
           return{
             authMode: prevState.authMode=== "login"? "signup": "login"
           };
         })
-
-      
       }
+        
       updateStyles=(dims)=>{
         this.setState({
             viewMode:
@@ -65,15 +68,15 @@ class AuthScreen extends Component{
           });
       }
     
-    loginHandler=()=>{
+    tryAuthHandler=()=>{
        // alert('hello')
        const authData={
          email: this.state.controls.email.value,
          password: this.state.controls.password.value,
          confirmPassword: this.state.controls.confirmPassword.value
        }
-       this.props.onLogin(authData);
-        startMainTabs();
+       this.props.ontryAuth(authData,this.state.authMode)
+        // startMainTabs();
     }
 
     updateInputState = (key, value) => {
@@ -147,8 +150,15 @@ class AuthScreen extends Component{
     //     }
     //   })
     // }
-    render(){
+    render()
+    {
         let confirmPasswordView= null;
+        let submitButton = ( <ButtonWithBackground color="#29aaf4" onPress={this.tryAuthHandler}
+        disabled={!this.state.controls.email.valid ||!this.state.controls.password.valid|| !this.state.controls.confirmPassword.valid && this.state.authMode==="signup" }
+        > Login</ButtonWithBackground>)
+        if(this.props.isLoading){
+          submitButton=(<View><ActivityIndicator/><Text>logging in....</Text></View>)
+        }
         let heading =null;
         if(this.state.viewMode === "portrait"){
             heading= (
@@ -177,6 +187,7 @@ class AuthScreen extends Component{
             />
           </View>);
         }
+
         return(
             <ImageBackground style={styles.bg}source={image}>
         <KeyboardAvoidingView style={styles.container} behaviour="padding">
@@ -220,10 +231,7 @@ class AuthScreen extends Component{
             </View>
           </View>
           </TouchableWithoutFeedback>
-          <ButtonWithBackground color="#29aaf4" onPress={this.loginHandler}
-          disabled={!this.state.controls.email.valid ||!this.state.controls.password.valid|| !this.state.controls.confirmPassword.valid && this.state.authMode==="signup" }
-          > Login</ButtonWithBackground>
-          
+          {submitButton}
           </KeyboardAvoidingView>
         </ImageBackground>
         )
@@ -262,9 +270,16 @@ const styles= StyleSheet.create({
       width: "100%"
     }
 })
+const mapStateToProps= state=>{
+  return{
+    isLoading: state.ui.isLoading
+  }
+ 
+}
 const mapDispatchToProps=(dispatch)=>{
   return{
-    onLogin: (authData)=> dispatch(tryAuth(authData))
+    ontryAuth: (authData, authMode)=> dispatch(tryAuth(authData, authMode)),
+    onautoSignIn: ()=> dispatch(autoSignIn())
   }
 }
-export default connect(null, mapDispatchToProps)(AuthScreen);
+export default connect(mapStateToProps, mapDispatchToProps)(AuthScreen);

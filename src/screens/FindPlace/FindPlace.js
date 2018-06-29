@@ -68,6 +68,7 @@ class FindPlace extends Component{
         });
     }
     render(){
+        console.log(this.props.places)
         let content=(
             <Animated.View style={{
                 opacity: this.state.removeAnim,
@@ -82,7 +83,7 @@ class FindPlace extends Component{
             }}>
             <TouchableOpacity onPress={this.placesSearchHandler}>
                 <View style={styles.searchButton}>
-                    <Text style={styles.searchButtonText}>Find places</Text>
+                    <Text style={styles.searchButtonText}>Find your place</Text>
                 </View>
             </TouchableOpacity>
             </Animated.View>
@@ -91,6 +92,7 @@ class FindPlace extends Component{
             content=(
                 // <Animated.View style={{opacity: this.state.placesAnim}}>
                 <PlaceList places={this.props.places} onItemPress={this.itemSelectedHandler}/>
+                
                 // </Animated.View>
 
             )

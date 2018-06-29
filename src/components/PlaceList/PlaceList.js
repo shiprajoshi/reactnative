@@ -6,14 +6,16 @@ class PlaceList extends Component{
         super(props);
     }
     render(){
+        console.log(this.props, 'props');
         return(
             <FlatList
             style={styles.listView}
             data={this.props.places}
-            renderItem={(info)=>(<ListItem key={info.item.key} 
-                                           placeName={info.item.value}
+            renderItem={(info)=>{console.log(info, 'info, placelist');
+                                    return(<ListItem key={info.item.key} 
+                                           placeName={info.item.name}
                                            imageName={info.item.image}
-                                           onItemPressed={()=>this.props.onItemPress(info.item.key)} />)}/>
+                                           onItemPressed={()=>this.props.onItemPress(info.item.key)} />)}}/>
             // <View>
             //     {
             //         this.props.places.map((place, index)=>{
